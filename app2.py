@@ -1,23 +1,28 @@
-import streamlit as st
+"""
+Cara jalankan:
 
-st.set_page_config(page_title="ChatBotKu", layout="wide")
+>>> python app2.py
+"""
 
-st.markdown("# ChatBotKu")
+import os
+import getpass
 
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+from langchain_groq import ChatGroq
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+GROQ_API_KEY = getpass.getpass("Enter your API key: ")
+os.environ["GROQ_API_KEY"] = GROQ_API_KEY
 
-prompt = st.chat_input("Apa yang ingin kamu tanyakan?")
+llm =  ChatGroq(model="meta-llama/llama-4-scout-17b-16e-instruct")
 
-if prompt:
-    st.chat_message("user").markdown(prompt)
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    
-    response = f"Respon dari ChatBotKu untuk: {prompt}"
-    with st.chat_message("assistant"):
-        st.markdown(response)
-    st.session_state.messages.append({"role": "assistant", "content": response})
+chat_history = []
+
+print("Silahkan chat dengan AI anda!!!")
+while True:
+    user_chat = input("User: ")
+    chat_history.append(
+        HumanMessage(user_chat)
+    )
+    response = llm.invoke(chat_history)
+    chat_history.append(response)
+    print(response.content)
